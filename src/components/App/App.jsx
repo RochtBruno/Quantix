@@ -2,6 +2,7 @@ import React from "react"
 
 import Header from "../Header/Header.jsx"
 import FinanceCard from "../FinanceCard/FinanceCard.jsx"
+import SignIn from "../SignIn/SignIn.jsx"
 
 function App() {
 
@@ -13,6 +14,10 @@ function App() {
       <FinanceCard title={"Receitas"} value={50}/>
       <FinanceCard title={"Despesas"} value={75}/>
       <FinanceCard title={"Saldo"} value={100}/>
+      {/* <SignIn /> */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+      </div>
     </main>
     </>
   )
