@@ -6,7 +6,7 @@ function Transactions() {
 		<div className="bg-white rounded-xl shadow-sm border border-slate-200">
 			<div className="p-6 border-b border-slate-200 flex justify-between items-center">
 				<h2 className="text-xl font-bold text-slate-800">Transações</h2>
-				<button className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg transition">Adicionar</button>
+				<button className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 hover:cursor-pointer text-white px-4 py-2 rounded-lg transition">Adicionar</button>
 			</div>
 			<div className="p-8 text-center text-slate-500">Nenhuma transação registrada</div>
 		</div>
