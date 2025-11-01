@@ -1,4 +1,5 @@
-import React, { useState } from "react"
+import React, { useState, useContext } from "react"
+import TransactionsContext from "../../contexts/TransactionsContext.jsx"
 
 const CATEGORY_OPTIONS = {
 	Receita: ["Salário", "Investimentos", "Bônus", "Outros"],
@@ -7,7 +8,8 @@ const CATEGORY_OPTIONS = {
 
 function Transactions() {
 	const [showForm, setShowForm] = useState(false)
-	const [transactions, setTransactions] = useState([])
+	// const [transactions, setTransactions] = useState([])
+	const { transactions, addTransaction } = useContext(TransactionsContext)
 	const [form, setForm] = useState({
 		type: "Receita",
 		value: "",
@@ -56,7 +58,8 @@ function Transactions() {
 			description: form.description
 		}
 		// corrigido: manter histórico anterior
-		setTransactions((prev) => [newTx, ...prev])
+		addTransaction(newTx)
+		
 		resetForm()
 		setShowForm(false)
 	}
