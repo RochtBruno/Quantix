@@ -1,39 +1,103 @@
 import React, { useState } from "react"
 
+const formatCurrencyNumber = (n) =>
+	new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(n)
+
+// interpreta dígitos -> centavos (ex: "1000" => R$ 10,00)
+function formatInputFromDigits(digits){
+	if(!digits) return ""
+	const num = parseInt(digits, 10)
+	const value = num / 100
+	return formatCurrencyNumber(value)
+}
+
+function formatDate(d){
+	if(!d) return ""
+	// aceita Date, ISO string ou yyyy-mm-dd
+	const date = new Date(d)
+	if (!isNaN(date)) {
+		const dd = String(date.getDate()).padStart(2, "0")
+		const mm = String(date.getMonth() + 1).padStart(2, "0")
+		const yyyy = date.getFullYear()
+		return `${dd}/${mm}/${yyyy}`
+	}
+	// fallback: tenta parse simples yyyy-mm-dd
+	const parts = String(d).split("-")
+	if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`
+	return String(d)
+}
+
 function Goals() {
 
 	const [showForm, setShowForm] = useState(false)
 	const [goals, setGoals] = useState([])
+
+	// inline editing for adding value
 	const [editingGoalId, setEditingGoalId] = useState(null)
-	const [editingAmount, setEditingAmount] = useState("")
+	const [editingAmountDisplay, setEditingAmountDisplay] = useState("")
+	const [editingAmountNumber, setEditingAmountNumber] = useState(0)
+
 	const [form, setForm] = useState({
 		title: "",
-		goalValue: "",
-		currentValue: "",
+		// goalValueNumber/currentValueNumber: números (float)
+		goalValueNumber: 0,
+		goalDisplayValue: "",
+		currentValueNumber: 0,
+		currentDisplayValue: "",
 		limitDate: new Date().toISOString().slice(0, 10)
 	})
 
 	const resetForm = () => {
 		setForm({
 			title: "",
-			goalValue: "",
-			currentValue: "",
+			goalValueNumber: 0,
+			goalDisplayValue: "",
+			currentValueNumber: 0,
+			currentDisplayValue: "",
 			limitDate: new Date().toISOString().slice(0, 10)
 		})
 	}
 
 	const handleChange = (e) => {
 		const { name, value } = e.target
-		setForm((prev) => {
-			return{ ...prev, [name]: value}
-		})
+
+		// máscara por dígitos para goalValue
+		if (name === "goalValue") {
+			const digits = value.replace(/\D/g, "")
+			if (digits === "") {
+				setForm(prev => ({ ...prev, goalValueNumber: 0, goalDisplayValue: "" }))
+				return
+			}
+			const num = parseInt(digits, 10)
+			const valueNumber = num / 100
+			const displayValue = formatInputFromDigits(digits)
+			setForm(prev => ({ ...prev, goalValueNumber: valueNumber, goalDisplayValue: displayValue }))
+			return
+		}
+
+		// máscara por dígitos para currentValue
+		if (name === "currentValue") {
+			const digits = value.replace(/\D/g, "")
+			if (digits === "") {
+				setForm(prev => ({ ...prev, currentValueNumber: 0, currentDisplayValue: "" }))
+				return
+			}
+			const num = parseInt(digits, 10)
+			const valueNumber = num / 100
+			const displayValue = formatInputFromDigits(digits)
+			setForm(prev => ({ ...prev, currentValueNumber: valueNumber, currentDisplayValue: displayValue }))
+			return
+		}
+
+		// outros campos (title, limitDate)
+		setForm(prev => ({ ...prev, [name]: value }))
 	}
 
 	const handleSubmit = (e) => {
 		e.preventDefault()
-		const parsedGoal = parseFloat(form.goalValue.toString().replace(",", "."))
-		const parsedCurrent = parseFloat(form.currentValue.toString().replace(",", "."))
-		if((!parsedGoal || isNaN(parsedGoal)) && (!parsedCurrent || isNaN(parsedCurrent))){
+		const parsedGoal = Number(form.goalValueNumber) || 0
+		const parsedCurrent = Number(form.currentValueNumber) || 0
+		if ((parsedGoal <= 0 || isNaN(parsedGoal)) && (parsedCurrent <= 0 || isNaN(parsedCurrent))) {
 			alert("Informe um valor válido!")
 			return
 		}
@@ -56,23 +120,35 @@ function Goals() {
 
 	const startEditing = (id) => {
 		setEditingGoalId(id)
-		setEditingAmount("")
+		setEditingAmountDisplay("")
+		setEditingAmountNumber(0)
 	}
 
 	const cancelEditing = () => {
 		setEditingGoalId(null)
-		setEditingAmount("")
+		setEditingAmountDisplay("")
+		setEditingAmountNumber(0)
+	}
+
+	const onEditingAmountChange = (e) => {
+		const value = e.target.value
+		const digits = value.replace(/\D/g, "")
+		if (digits === "") {
+			setEditingAmountDisplay("")
+			setEditingAmountNumber(0)
+			return
+		}
+		const num = parseInt(digits, 10)
+		const valueNumber = num / 100
+		const displayValue = formatInputFromDigits(digits)
+		setEditingAmountNumber(valueNumber)
+		setEditingAmountDisplay(displayValue)
 	}
 
 	const confirmAddToGoal = (id) => {
-		const raw = editingAmount.trim()
-		if (!raw) {
-			alert("Informe um valor para adicionar")
-			return
-		}
-		const parsed = parseFloat(raw.replace(",", "."))
-		if (!parsed || isNaN(parsed)) {
-			alert("Valor inválido")
+		const parsed = Number(editingAmountNumber) || 0
+		if (parsed <= 0 || isNaN(parsed)) {
+			alert("Informe um valor válido")
 			return
 		}
 		setGoals((prev) =>
@@ -86,7 +162,7 @@ function Goals() {
 	}
 
 	const currency = (v) => {
-		return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL"}).format(v)
+		return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL"}).format(v || 0)
 	}
 
 	return(
@@ -107,8 +183,9 @@ function Goals() {
 							name="title"
 							value={form.title}
 							onChange={handleChange}
-							className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+							className="w-full focus:outline-none placeholder-gray-500 px-3 py-2 border border-slate-300 rounded-lg"
 							placeholder="Ex: Viagem, Emergência..."
+							required
 						/>
 					</div>
 
@@ -117,22 +194,22 @@ function Goals() {
 							<label className="block text-sm font-medium text-slate-700 mb-1">Valor da meta</label>
 							<input
 								name="goalValue"
-								value={form.goalValue}
+								value={form.goalDisplayValue}
 								onChange={handleChange}
-								inputMode="decimal"
-								placeholder="0.00"
-								className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+								inputMode="numeric"
+								placeholder="R$ 0,00"
+								className="w-full focus:outline-none placeholder-gray-500 px-3 py-2 border border-slate-300 rounded-lg"
 							/>
 						</div>
 						<div>
 							<label className="block text-sm font-medium text-slate-700 mb-1">Valor inicial</label>
 							<input
 								name="currentValue"
-								value={form.currentValue}
+								value={form.currentDisplayValue}
 								onChange={handleChange}
-								inputMode="decimal"
-								placeholder="0.00"
-								className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+								inputMode="numeric"
+								placeholder="R$ 0,00"
+								className="w-full focus:outline-none placeholder-gray-500 px-3 py-2 border border-slate-300 rounded-lg"
 							/>
 						</div>
 					</div>
@@ -144,7 +221,7 @@ function Goals() {
 							type="date"
 							value={form.limitDate}
 							onChange={handleChange}
-							className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+							className="w-full focus:outline-none placeholder-gray-500 px-3 py-2 border border-slate-300 rounded-lg"
 						/>
 					</div>
 
@@ -169,7 +246,7 @@ function Goals() {
 								<div className="flex items-center justify-between">
 									<div>
 										<div className="text-sm font-medium text-slate-800">{g.title}</div>
-										<div className="text-xs text-slate-500">Limite: {g.limitDate}</div>
+										<div className="text-xs text-slate-500">Limite: {formatDate(g.limitDate)}</div>
 									</div>
 									<div className="text-right">
 										<div className="font-semibold text-slate-800">{currency(g.currentValue)} / {currency(g.goalValue)}</div>
@@ -191,10 +268,10 @@ function Goals() {
 										<div className="flex items-center gap-2">
 											<input
 												type="text"
-												value={editingAmount}
-												onChange={(e) => setEditingAmount(e.target.value)}
-												placeholder="Valor (ex: 100.00)"
-												className="px-3 py-2 border border-slate-300 rounded-lg w-40"
+												value={editingAmountDisplay}
+												onChange={onEditingAmountChange}
+												placeholder="R$ 0,00"
+												className="px-3 focus:outline-none placeholder-gray-500 py-2 border border-slate-300 rounded-lg w-40"
 											/>
 											<button
 												onClick={() => confirmAddToGoal(g.id)}

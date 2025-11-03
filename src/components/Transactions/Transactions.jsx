@@ -19,6 +19,22 @@ function formatInputFromDigits(digits){
 	return formatCurrencyNumber(value)
 }
 
+function formatDate(d){
+	if(!d) return ""
+	// aceita Date, ISO string ou yyyy-mm-dd
+	const date = new Date(d)
+	if (!isNaN(date)) {
+		const dd = String(date.getDate()).padStart(2, "0")
+		const mm = String(date.getMonth() + 1).padStart(2, "0")
+		const yyyy = date.getFullYear()
+		return `${dd}/${mm}/${yyyy}`
+	}
+	// fallback: tenta parse simples yyyy-mm-dd
+	const parts = String(d).split("-")
+	if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`
+	return String(d)
+}
+
 function Transactions() {
 	const [showForm, setShowForm] = useState(false)
 	const { transactions, addTransaction } = useContext(TransactionsContext)
@@ -115,7 +131,7 @@ function Transactions() {
 						name="type"
 						value={form.type}
 						onChange={handleChange}
-						className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+						className="w-full focus:outline-none placeholder-gray-500 px-3 py-2 border border-slate-300 rounded-lg"
 					  >
 						<option>Receita</option>
 						<option>Despesa</option>
@@ -130,7 +146,7 @@ function Transactions() {
 						onChange={handleChange}
 						inputMode="numeric"
 						placeholder="R$ 0,00"
-						className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+						className="w-full focus:outline-none placeholder-gray-500 px-3 py-2 border border-slate-300 rounded-lg"
 					  />
 					</div>
 				  </div>
@@ -143,7 +159,7 @@ function Transactions() {
 						  name="category"
 						  value={form.category}
 						  onChange={handleChange}
-						  className="w-full px-3 py-2 border border-slate-300 rounded-lg hover:cursor-pointer"
+						  className="w-full focus:outline-none placeholder-gray-500 px-3 py-2 border border-slate-300 rounded-lg hover:cursor-pointer"
 						>
 						  {CATEGORY_OPTIONS[form.type].map((c) => (
 							<option key={c} value={c}>
@@ -160,19 +176,19 @@ function Transactions() {
 						  type="date"
 						  value={form.date}
 						  onChange={handleChange}
-						  className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+						  className="w-full focus:outline-none placeholder-gray-500 px-3 py-2 border border-slate-300 rounded-lg"
 						/>
 					  </div>
 				  </div>
 
 				  {/* Descrição embaixo, full-width */}
 				  <div>
-					  <label className="block text-sm font-medium text-slate-700 mb-1 hover:cursor-pointer">Descrição</label>
+					  <label className="block  text-sm font-medium text-slate-700 mb-1 hover:cursor-pointer">Descrição</label>
 					  <input
 						name="description"
 						value={form.description}
 						onChange={handleChange}
-						className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+						className="w-full focus:outline-none placeholder-gray-500 px-3 py-2 border border-slate-300 rounded-lg"
 						placeholder="Observações (opcional)"
 					  />
 				  </div>
@@ -223,7 +239,7 @@ function Transactions() {
 						<div className={`font-semibold ${t.type === "Receita" ? "text-emerald-600" : "text-red-600"}`}>
 						  {currency(t.value)}
 						</div>
-						<div className="text-xs text-slate-500">{t.date}</div>
+						<div className="text-xs text-slate-500">{formatDate(t.date)}</div>
 					  </div>
 					</li>
 				  ))}
