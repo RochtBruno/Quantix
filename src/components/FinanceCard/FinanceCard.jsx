@@ -27,6 +27,11 @@ function FinanceCard({title, value}) {
 		return <IoIosTrendingUp className={`text-${colorCard}-500 text-xl`} />;
 	}
 
+	const formatCurrency = (v) => {
+		const num = Number(v) || 0
+		return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(num)
+	}
+
 
 	return(
 		<>
@@ -37,7 +42,7 @@ function FinanceCard({title, value}) {
 						{renderIcon()}
 						</div>
 				</div>
-				<p className={`text-2xl font-bold text-${colorCard}-600`}>R${value},00</p>
+				<p className={`text-2xl font-bold text-${colorCard}-600`}>{formatCurrency(value)}</p>
 			</div>
 		</>
 	)
