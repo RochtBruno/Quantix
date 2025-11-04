@@ -3,7 +3,6 @@ import React, { useState } from "react"
 const formatCurrencyNumber = (n) =>
 	new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(n)
 
-// interpreta dígitos -> centavos (ex: "1000" => R$ 10,00)
 function formatInputFromDigits(digits){
 	if(!digits) return ""
 	const num = parseInt(digits, 10)
@@ -13,7 +12,10 @@ function formatInputFromDigits(digits){
 
 function formatDate(d){
 	if(!d) return ""
-	// aceita Date, ISO string ou yyyy-mm-dd
+	if (typeof d === "string" && /^\d{4}-\d{2}-\d{2}$/.test(d)) {
+		const [yyyy, mm, dd] = d.split("-")
+		return `${dd}/${mm}/${yyyy}`
+	}
 	const date = new Date(d)
 	if (!isNaN(date)) {
 		const dd = String(date.getDate()).padStart(2, "0")
@@ -21,7 +23,7 @@ function formatDate(d){
 		const yyyy = date.getFullYear()
 		return `${dd}/${mm}/${yyyy}`
 	}
-	// fallback: tenta parse simples yyyy-mm-dd
+
 	const parts = String(d).split("-")
 	if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`
 	return String(d)
@@ -39,7 +41,6 @@ function Goals() {
 
 	const [form, setForm] = useState({
 		title: "",
-		// goalValueNumber/currentValueNumber: números (float)
 		goalValueNumber: 0,
 		goalDisplayValue: "",
 		currentValueNumber: 0,
@@ -60,8 +61,6 @@ function Goals() {
 
 	const handleChange = (e) => {
 		const { name, value } = e.target
-
-		// máscara por dígitos para goalValue
 		if (name === "goalValue") {
 			const digits = value.replace(/\D/g, "")
 			if (digits === "") {
@@ -75,7 +74,6 @@ function Goals() {
 			return
 		}
 
-		// máscara por dígitos para currentValue
 		if (name === "currentValue") {
 			const digits = value.replace(/\D/g, "")
 			if (digits === "") {
@@ -89,7 +87,6 @@ function Goals() {
 			return
 		}
 
-		// outros campos (title, limitDate)
 		setForm(prev => ({ ...prev, [name]: value }))
 	}
 

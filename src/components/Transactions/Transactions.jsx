@@ -10,8 +10,7 @@ function formatCurrencyNumber(n){
 	return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(n)
 }
 
-// interpreta entrada como dígitos -> centavos (usuário digita "1000" => R$10,00)
-// essa estratégia evita problemas de cursor e símbolos enquanto digita
+
 function formatInputFromDigits(digits){
 	if(!digits) return ""
 	const num = parseInt(digits, 10)
@@ -21,7 +20,10 @@ function formatInputFromDigits(digits){
 
 function formatDate(d){
 	if(!d) return ""
-	// aceita Date, ISO string ou yyyy-mm-dd
+	if (typeof d === "string" && /^\d{4}-\d{2}-\d{2}$/.test(d)) {
+		const [yyyy, mm, dd] = d.split("-")
+		return `${dd}/${mm}/${yyyy}`
+	}
 	const date = new Date(d)
 	if (!isNaN(date)) {
 		const dd = String(date.getDate()).padStart(2, "0")
@@ -29,7 +31,7 @@ function formatDate(d){
 		const yyyy = date.getFullYear()
 		return `${dd}/${mm}/${yyyy}`
 	}
-	// fallback: tenta parse simples yyyy-mm-dd
+
 	const parts = String(d).split("-")
 	if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`
 	return String(d)
@@ -40,7 +42,6 @@ function Transactions() {
 	const { transactions, addTransaction } = useContext(TransactionsContext)
 	const [form, setForm] = useState({
 		type: "Receita",
-		// valueNumber: número em reais (float), displayValue: string formatada para input
 		valueNumber: 0,
 		displayValue: "",
 		category: CATEGORY_OPTIONS["Receita"][0],
@@ -151,7 +152,6 @@ function Transactions() {
 					</div>
 				  </div>
 
-				  {/* Categoria e Data lado a lado */}
 				  <div className="grid grid-cols-2 gap-4">
 					  <div>
 						<label className="block text-sm font-medium text-slate-700 mb-1">Categoria</label>
@@ -180,8 +180,6 @@ function Transactions() {
 						/>
 					  </div>
 				  </div>
-
-				  {/* Descrição embaixo, full-width */}
 				  <div>
 					  <label className="block  text-sm font-medium text-slate-700 mb-1 hover:cursor-pointer">Descrição</label>
 					  <input
