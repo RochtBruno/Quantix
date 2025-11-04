@@ -9,6 +9,10 @@ const addTransaction = (tx) => {
 	setTransactions((prev) => [tx, ...prev]);
 };
 
+const deleteTransaction = (id) => {
+	setTransactions((prev) => prev.filter((t) => t.id !== id))
+}
+
 const totals = useMemo(() => {
 	const totalReceitas = transactions
 	.filter((t) => t.type === "Receita")
@@ -22,7 +26,7 @@ const totals = useMemo(() => {
 
 return (
 	<TransactionsContext.Provider
-	value={{ transactions, addTransaction, ...totals }}
+	value={{ transactions, addTransaction, deleteTransaction, ...totals }}
 	>
 	{children}
 	</TransactionsContext.Provider>

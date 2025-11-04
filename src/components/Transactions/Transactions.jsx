@@ -39,7 +39,7 @@ function formatDate(d){
 
 function Transactions() {
 	const [showForm, setShowForm] = useState(false)
-	const { transactions, addTransaction } = useContext(TransactionsContext)
+	const { transactions, addTransaction, deleteTransaction } = useContext(TransactionsContext)
 	const [form, setForm] = useState({
 		type: "Receita",
 		valueNumber: 0,
@@ -101,6 +101,16 @@ function Transactions() {
 		addTransaction(newTx)
 		resetForm()
 		setShowForm(false)
+	}
+
+	const handleDelete = (id) => {
+		if(!id){
+			alert("Erro ao apagar card, id não encontrado")
+			return
+		}
+		if(window.confirm("Deseja excluir essa transação?")){
+			deleteTransaction(id)
+		}
 	}
 
 	const handleCancel = () => {
@@ -239,6 +249,7 @@ function Transactions() {
 						</div>
 						<div className="text-xs text-slate-500">{formatDate(t.date)}</div>
 					  </div>
+					  <button onClick={() => handleDelete(t.id)} className="bg-red-500 hover:bg-red-700 hover:cursor-pointer text-white px-4 py-2 rounded-lg transition">Excluir</button>
 					</li>
 				  ))}
 				</ul>

@@ -109,6 +109,11 @@ function Goals() {
 		resetForm()
 		setShowForm(false)
 	}
+	const handleDelete = (id) => {
+		if(window.confirm("Deseja excluir essa meta? ")){
+			setGoals((prev) => prev.filter((g) => g.id !== id))
+		}
+	}
 
 	const handleCancel = () => {
 		resetForm()
@@ -294,6 +299,7 @@ function Goals() {
 										</div>
 									)}
 								</div>
+								<button onClick={() => handleDelete(g.id)} className="bg-red-500 hover:bg-red-700 hover:cursor-pointer text-white px-4 py-2 rounded-lg transition">Excluir</button>
 							</li>
 						)
 					})}
