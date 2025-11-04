@@ -1,5 +1,6 @@
 import React, { useState, useContext } from "react"
 import TransactionsContext from "../../contexts/TransactionsContext.jsx"
+import { MdDelete } from "react-icons/md";
 
 const CATEGORY_OPTIONS = {
 	Receita: ["Salário", "Investimentos", "Bônus", "Outros"],
@@ -243,13 +244,15 @@ function Transactions() {
 						</div>
 					  </div>
 
-					  <div className="text-right">
+					  <div className="text-right flex gap-5">
+						<div >
 						<div className={`font-semibold ${t.type === "Receita" ? "text-emerald-600" : "text-red-600"}`}>
 						  {currency(t.value)}
 						</div>
 						<div className="text-xs text-slate-500">{formatDate(t.date)}</div>
 					  </div>
-					  <button onClick={() => handleDelete(t.id)} className="bg-red-500 hover:bg-red-700 hover:cursor-pointer text-white px-4 py-2 rounded-lg transition">Excluir</button>
+					  <button onClick={() => handleDelete(t.id)} className="px-2 py-2"><MdDelete className={`text-red-500 text-xl hover:cursor-pointer hover:text-red-700`}/></button>
+					  </div>
 					</li>
 				  ))}
 				</ul>

@@ -289,17 +289,18 @@ function Goals() {
 											</button>
 										</div>
 									) : (
-										<div className="flex justify-end">
+										<div className="flex justify-end gap-5">
 											<button
 												onClick={() => startEditing(g.id)}
 												className="px-3 py-1 text-sm bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 hover:cursor-pointer"
 											>
 												Adicionar Valor
 											</button>
+											<button onClick={() => handleDelete(g.id)} className="px-3 py-1 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 hover:cursor-pointer">Excluir</button>
 										</div>
 									)}
 								</div>
-								<button onClick={() => handleDelete(g.id)} className="bg-red-500 hover:bg-red-700 hover:cursor-pointer text-white px-4 py-2 rounded-lg transition">Excluir</button>
+								
 							</li>
 						)
 					})}
