@@ -7,6 +7,8 @@ import CurrentUserContext from "../../contexts/CurrentUserContext.js"
 function SignUp(){
 
 	const [email, setEmail] = useState("")
+	const [name, setName] = useState("")
+	const [lastName, setLastName] = useState("")
 	const [password, setPassword] = useState("")
 	const { setCurrentUser } = useContext(CurrentUserContext)
 	const navigate = useNavigate()
@@ -33,6 +35,14 @@ function SignUp(){
 					<div className="">
 						<label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
 						<input className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition" onChange={(e) => setEmail(e.target.value)}/>
+					</div>
+					<div className="">
+						<label className="block text-sm font-medium text-slate-700 mb-1">Nome</label>
+						<input className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition" onChange={(e) => setName(e.target.value)}/>
+					</div>
+					<div className="">
+						<label className="block text-sm font-medium text-slate-700 mb-1">Sobrenome</label>
+						<input className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition" onChange={(e) => setLastName(e.target.value)}/>
 					</div>
 					<div>
 						<label className="block text-sm font-medium text-slate-700 mb-1">Senha</label>
