@@ -114,3 +114,33 @@ export const sign = async (req, res) => {
 		})
 	}
 }
+
+export const getUser = async (req, res) => {
+	try{
+		const { userId } = req
+		const user = await prisma.user.findUnique({
+			where: {id: userId},
+			select:{
+				id: true,
+				email: true,
+				name: true,
+				lastName: true,
+				createdAt: true
+			}
+		})
+		if(!user){
+			return res.status(404).json({
+				error: "Usuário não encontrado"
+			})
+		}
+
+		res.status(200).json({
+			message: "Usuário encontrado",
+			user
+		})
+	}catch(error){
+		res.status(500).json({
+			error: `Erro ao buscar usuário: ${error}`
+		})
+	}
+}
