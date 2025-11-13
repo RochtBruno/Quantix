@@ -1,15 +1,17 @@
-const jwt = require('jsonwebtoken')
-const bcrypt = require('bcryptjs')
-require('dotenv').config()
-import { PrismaClient } from '../src/generated/prisma/index.js'
+import jwt from 'jsonwebtoken'
+import bcrypt from 'bcryptjs'
+import dotenv from 'dotenv'
+import { PrismaClient } from '@prisma/client'
+
+dotenv.config()
 
 const prisma = new PrismaClient()
 
 export const signup = async (req, res) => {
 	try{
-		const [email, name, lastName, password] = req.body
+		const {email, name, lastName, password} = req.body
 
-		if(!email || !name || lastName || !password){
+		if(!email || !name || !lastName || !password){
 			return res.status(400).json({
 				error: "Campos vazios não são permitidos"
 			})
@@ -60,7 +62,7 @@ export const signup = async (req, res) => {
 	}
 }
 
-export const sign = async (req, res) => {
+export const signin = async (req, res) => {
 	try{
 		const { email, password } = req.body
 		if(!email || !password){
