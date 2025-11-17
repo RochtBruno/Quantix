@@ -9,6 +9,8 @@ const prisma = new PrismaClient()
 
 export const signup = async (req, res) => {
 	try{
+
+		console.log('Dados recebidos:', req.body)
 		const {email, name, lastName, password} = req.body
 
 		if(!email || !name || !lastName || !password){
@@ -56,6 +58,7 @@ export const signup = async (req, res) => {
 			user
 		})
 	}catch(err){
+		console.error('ERRO NO SIGNUP:', err)
 		res.status(500).json({
 			error: "Erro ao cadastrar usuário"
 		})
