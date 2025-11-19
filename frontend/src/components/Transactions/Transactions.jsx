@@ -41,6 +41,8 @@ function formatDate(d){
 function Transactions() {
 	const [showForm, setShowForm] = useState(false)
 	const { transactions, addTransaction, deleteTransaction } = useContext(TransactionsContext)
+	const [loading, setLoading] = useState(false)
+	const [error, setError] = useState("")
 	const [form, setForm] = useState({
 		type: "Receita",
 		valueNumber: 0,

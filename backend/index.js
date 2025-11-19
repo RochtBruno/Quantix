@@ -2,6 +2,7 @@ import express from 'express'
 import cors from 'cors'
 import dotenv from 'dotenv'
 import usersRoutes from './routes/users.js'
+import transactionsRoutes from './routes/transactions.js'
 
 dotenv.config()
 
@@ -14,6 +15,7 @@ app.use(cors({
 app.use(express.json())
 
 app.use('/api/users', usersRoutes)
+app.use("/api/transactions",transactionsRoutes)
 
 const PORT = process.env.PORT || 4000
 
