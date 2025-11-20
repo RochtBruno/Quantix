@@ -3,6 +3,7 @@ import cors from 'cors'
 import dotenv from 'dotenv'
 import usersRoutes from './routes/users.js'
 import transactionsRoutes from './routes/transactions.js'
+import goalsRouter from "./routes/goals.js"
 
 dotenv.config()
 
@@ -16,6 +17,7 @@ app.use(express.json())
 
 app.use('/api/users', usersRoutes)
 app.use("/api/transactions",transactionsRoutes)
+app.use("api/goals", goalsRouter)
 
 const PORT = process.env.PORT || 4000
 
