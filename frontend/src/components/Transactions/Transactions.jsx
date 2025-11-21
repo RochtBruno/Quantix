@@ -1,5 +1,6 @@
-import React, { useState, useContext } from "react"
+import React, { useState, useContext, useEffect } from "react"
 import TransactionsContext from "../../contexts/TransactionsContext.jsx"
+import { getTransactions, createTransaction, deleteTransaction} from "../../api/api.js"
 import { MdDelete } from "react-icons/md";
 
 const CATEGORY_OPTIONS = {
@@ -40,7 +41,7 @@ function formatDate(d){
 
 function Transactions() {
 	const [showForm, setShowForm] = useState(false)
-	const { transactions, addTransaction, deleteTransaction } = useContext(TransactionsContext)
+	const { transactions, addTransaction, deleteTransaction: removeTransaction, setTransactions } = useContext(TransactionsContext)
 	const [loading, setLoading] = useState(false)
 	const [error, setError] = useState("")
 	const [form, setForm] = useState({
@@ -51,6 +52,23 @@ function Transactions() {
 		date: new Date().toISOString().slice(0, 10),
 		description: ""
 	})
+
+	useEffect(() => {
+		const fetchTransactions = async () => {
+			const token = localStorage.getItem('token')
+			if(!token) return
+			try {
+				setLoading(true)
+				const data = await getTransactions(token)
+				setTransactions(data.transactions)
+			} catch (error) {
+				setError(error.message || "Erro ao carregar transações")
+			} finally{
+				setLoading(false)
+			}
+		}
+		fetchTransactions()
+	},[])
 
 	const resetForm = () => {
 		setForm({
@@ -86,33 +104,62 @@ function Transactions() {
 		setForm(prev => ({ ...prev, [name]: value }))
 	}
 
-	const handleAdd = (e) => {
+	const handleAdd = async(e) => {
 		e.preventDefault()
 		const parsedValue = Number(form.valueNumber) || 0
 		if(parsedValue <= 0 || isNaN(parsedValue)){
 			alert("Informe um valor válido")
 			return
 		}
-		const newTx = {
-			id: Date.now(),
-			type: form.type,
-			value: parsedValue,
-			category: form.category,
-			date: form.date,
-			description: form.description
+		const token = localStorage.getItem("token")
+		if(!token){
+			alert("Você precisa estar logado para fazer essa ação")
+			return
 		}
-		addTransaction(newTx)
-		resetForm()
-		setShowForm(false)
+		try {
+			setLoading(true)
+			setError("")
+			const data = await createTransaction(
+				token,
+				form.type,
+				parsedValue,
+				form.category,
+				form.date,
+				form.description
+			)
+			addTransaction(data.transaction)
+			resetForm()
+			setShowForm(false)
+		} catch (error) {
+			setError(error.message || "Erro ao criar transação")
+		} finally{
+			setLoading(false)
+		}
+
 	}
 
-	const handleDelete = (id) => {
+	const handleDelete = async (id) => {
 		if(!id){
 			alert("Erro ao apagar card, id não encontrado")
 			return
 		}
-		if(window.confirm("Deseja excluir essa transação?")){
-			deleteTransaction(id)
+		if(!window.confirm("Deseja excluir essa transação?")){
+			return
+		}
+		const token = localStorage.getItem('token')
+		if(!token){
+			alert("Você precisa estar logado para fazer essa ação")
+			return
+		}
+		try {
+			setLoading(true)
+			setError("")
+			await deleteTransaction(token, id)
+			removeTransaction(id)
+		} catch (error) {
+			setError(error.message || "Erro ao deletra transação")
+		} finally{
+			setLoading(false)
 		}
 	}
 
@@ -216,7 +263,7 @@ function Transactions() {
 					  type="submit"
 					  className="px-4 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 text-sm hover:cursor-pointer"
 					>
-					  Adicionar
+					  {loading ? "Salvando..." : "Adicionar"}
 					</button>
 				  </div>
 				</form>
@@ -224,7 +271,9 @@ function Transactions() {
 			)}
 
 			<div className="p-6">
-			  {transactions.length === 0 ? (
+			  {loading && transactions.length === 0 ? (
+				<div className="text-center text-slate-500">Carregando transações</div>
+			  ) : transactions.length === 0 ? (
 				<div className="text-center text-slate-500">Nenhuma transação registrada</div>
 			  ) : (
 				<ul className="space-y-4">

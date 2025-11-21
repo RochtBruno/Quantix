@@ -36,3 +36,46 @@ export async function getCurrentUser(token){
 	}
 	return data
 }
+
+export async function getTransactions(token){
+	const res = await fetch(`${API_URL}/transactions`,{
+		method: "GET",
+		headers: { Authorization : `Bearer ${token}`}
+	})
+	const data = await res.json()
+	if(!res.ok){
+		throw new Error(data.error || "Erro ao buscar transações")
+	}
+	return data
+}
+
+export async function createTransaction(token, type, value, category, date, description){
+	const res = await fetch(`${API_URL}/transactions`, {
+		method: "POST",
+		headers: { 
+		Authorization: `Bearer ${token}`, 
+		'Content-Type': "application/json"
+		},
+		body: JSON.stringify({type, value, category, date, description})
+	})
+	const data = await res.json()
+	if(!res.ok){
+		throw new Error(data.error || "Erro ao criar transação")
+	}
+	return data
+}
+
+export async function deleteTransaction(token, id){
+	const res = await fetch(`${API_URL}/transactions/${id}`,{
+		method: "DELETE",
+		headers: {
+			Authorization : `Bearer ${token}`,
+			'Content-Type': 'application/json'
+		}
+	})
+	const data = await res.json()
+	if(!res.ok){
+		throw new Error(data.error || "Erro ao deletar transação")
+	}
+	return data
+}

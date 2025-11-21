@@ -26,7 +26,7 @@ const totals = useMemo(() => {
 
 return (
 	<TransactionsContext.Provider
-	value={{ transactions, addTransaction, deleteTransaction, ...totals }}
+	value={{ transactions,setTransactions, addTransaction, deleteTransaction, ...totals }}
 	>
 	{children}
 	</TransactionsContext.Provider>

@@ -6,6 +6,6 @@ const router = express.Router()
 
 router.get("/", authMiddleware, getTransactions)
 router.post("/", authMiddleware, createTransaction)
-router.delete("/", authMiddleware, deleteTransaction)
+router.delete("/:id", authMiddleware, deleteTransaction)
 
 export default router

@@ -7,7 +7,7 @@ export const getTransactions = async(req, res) => {
 		const { userId } = req
 		const transactions = await prisma.transaction.findMany({
 			where: { userId },
-			orderBy: { createdAt }
+			orderBy: { createdAt : 'desc'}
 		})
 		res.status(200).json({
 			message: "Transações encontradas",transactions
@@ -38,7 +38,7 @@ export const createTransaction = async (req, res) => {
 				value: parseFloat(value),
 				category,
 				date: new Date(date),
-				description: description || NULL
+				description: description || null
 			}
 		})
 

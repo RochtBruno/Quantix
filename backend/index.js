@@ -17,7 +17,7 @@ app.use(express.json())
 
 app.use('/api/users', usersRoutes)
 app.use("/api/transactions",transactionsRoutes)
-app.use("api/goals", goalsRouter)
+app.use("/api/goals", goalsRouter)
 
 const PORT = process.env.PORT || 4000
 
