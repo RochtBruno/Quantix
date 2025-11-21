@@ -1,4 +1,5 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
+import { getGoals, createGoal, updateGoal, deleteGoal } from "../../api/api.js"
 
 const formatCurrencyNumber = (n) =>
 	new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(n)
@@ -38,6 +39,8 @@ function Goals() {
 	const [editingGoalId, setEditingGoalId] = useState(null)
 	const [editingAmountDisplay, setEditingAmountDisplay] = useState("")
 	const [editingAmountNumber, setEditingAmountNumber] = useState(0)
+	const [error, setError] = useState("")
+	const [loading, setLoading] = useState(false)
 
 	const [form, setForm] = useState({
 		title: "",
@@ -47,6 +50,23 @@ function Goals() {
 		currentDisplayValue: "",
 		limitDate: new Date().toISOString().slice(0, 10)
 	})
+
+	useEffect(() => {
+		const fetchGoals = async () => {
+			const token = localStorage.getItem('token')
+			if(!token) return
+			try {
+				setLoading(true)
+				const data = await getGoals(token)
+				setGoals(data.goals)
+			} catch (error) {
+				setError(error.message || "Erro ao carregar metas")
+			} finally{
+				setLoading(false)
+			}
+		}
+		fetchGoals()
+	},[])
 
 	const resetForm = () => {
 		setForm({
@@ -90,29 +110,62 @@ function Goals() {
 		setForm(prev => ({ ...prev, [name]: value }))
 	}
 
-	const handleSubmit = (e) => {
+	const handleSubmit = async(e) => {
 		e.preventDefault()
 		const parsedGoal = Number(form.goalValueNumber) || 0
 		const parsedCurrent = Number(form.currentValueNumber) || 0
-		if ((parsedGoal <= 0 || isNaN(parsedGoal)) && (parsedCurrent <= 0 || isNaN(parsedCurrent))) {
+		if (parsedGoal <= 0 || isNaN(parsedGoal)) {
 			alert("Informe um valor válido!")
 			return
 		}
-		const newGoal = {
-			id: Date.now(),
-			title: form.title || "Nova meta",
-			goalValue: parsedGoal,
-			currentValue: parsedCurrent,
-			limitDate: form.limitDate
+		const token = localStorage.getItem('token')
+		if(!token){
+			alert("Você precisa estar logado para fazer essa ação")
+			return
 		}
-		setGoals((prev) => [newGoal, ...prev])
-		resetForm()
-		setShowForm(false)
+		try {
+			setLoading(true)
+			setError("")
+			const data = await createGoal(
+				token,
+				form.title,
+				parsedGoal,
+				parsedCurrent,
+				form.limitDate
+			)
+			setGoals((prev) => [data.goal, ...prev])
+			resetForm()
+			setShowForm(false)
+		} catch (error) {
+			setError(error.message)
+		}finally{
+			setLoading(false)
+		}
 	}
-	const handleDelete = (id) => {
-		if(window.confirm("Deseja excluir essa meta? ")){
-			setGoals((prev) => prev.filter((g) => g.id !== id))
+
+	const handleDelete = async (id) => {
+		if(!window.confirm("Deseja excluir essa meta? ")){
+			return
 		}
+		const token = localStorage.getItem('token')
+		if(!token){
+			alert("Você precisa estar logado para fazer essa ação")
+			return
+		}
+		try {
+			setLoading(true)
+			setError("")
+			await deleteGoal(token, id)
+			setGoals((prev) => prev.filter((g) => g.id !== id))
+		} catch (error) {
+			setError(error.message)
+		} finally{
+			setLoading(false)
+		}
+	}
+
+	const currency = (v) => {
+		return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL"}).format(v)
 	}
 
 	const handleCancel = () => {
@@ -147,24 +200,44 @@ function Goals() {
 		setEditingAmountDisplay(displayValue)
 	}
 
-	const confirmAddToGoal = (id) => {
+	const confirmAddToGoal = async (id) => {
 		const parsed = Number(editingAmountNumber) || 0
 		if (parsed <= 0 || isNaN(parsed)) {
 			alert("Informe um valor válido")
 			return
 		}
-		setGoals((prev) =>
-			prev.map((g) =>
-				g.id === id
-					? { ...g, currentValue: Math.min(g.goalValue, (g.currentValue || 0) + parsed) }
-					: g
+		
+		const token = localStorage.getItem('token')
+		if (!token) {
+			alert("Você precisa estar logado")
+			return
+		}
+		
+		const goal = goals.find((g) => g.id === id)
+		if (!goal) return
+		
+		const newCurrentValue = Math.min(goal.goalValue, (goal.currentValue || 0) + parsed)
+		
+		try {
+			setLoading(true)
+			setError("")
+			
+			await updateGoal(token, id, newCurrentValue)
+			
+			setGoals((prev) =>
+				prev.map((g) =>
+					g.id === id
+						? { ...g, currentValue: newCurrentValue }
+						: g
+				)
 			)
-		)
-		cancelEditing()
-	}
-
-	const currency = (v) => {
-		return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL"}).format(v || 0)
+			cancelEditing()
+		} catch (error) {
+			setError(error.message || "Erro ao atualizar meta")
+			alert(error.message || "Erro ao atualizar meta")
+		} finally {
+			setLoading(false)
+		}
 	}
 
 	return(

@@ -16,7 +16,7 @@ export const getGoals = async (req, res) => {
 			goals
 		})
 	} catch (error) {
-		console.log("Erro ao buscar metas". error)
+		console.log("Erro ao buscar metas", error)
 		res.status(500).json({
 			error: "Erro ao buscar metas"
 		})

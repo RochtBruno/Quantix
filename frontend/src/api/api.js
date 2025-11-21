@@ -79,3 +79,62 @@ export async function deleteTransaction(token, id){
 	}
 	return data
 }
+
+export async function getGoals(token){
+	const res = await fetch(`${API_URL}/goals`, {
+		method: "GET",
+		headers: { Authorization: `Bearer ${token}`}
+	})
+	const data = await res.json()
+	if(!res.ok){
+		throw new Error(data.error)
+	}
+	return data
+}
+
+export async function createGoal(token, title, goalValue, currentValue, limitDate) {
+	const res = await fetch(`${API_URL}/goals`, {
+		method: "POST",
+		headers: {
+			Authorization: `Bearer ${token}`,
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify({title, goalValue, currentValue, limitDate})
+	})
+	const data = await res.json()
+	if(!res.ok){
+		throw new Error(data.error)
+	}
+	return data
+}
+
+export async function updateGoal(token, id, currentValue){
+	const res = await fetch(`${API_URL}/goals/${id}`, {
+		method: "PATCH",
+		headers: {
+			Authorization: `Bearer ${token}`,
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify({currentValue})
+	})
+	const data = await res.json()
+	if(!res.ok){
+		throw new Error(data.error)
+	}
+	return data
+}
+
+export async function deleteGoal(token,id){
+	const res = await fetch(`${API_URL}/goals/${id}`, {
+		method: "DELETE",
+		headers: {
+			Authorization: `Bearer ${token}`,
+			'Content-Type': 'application/json'
+		}
+	})
+	const data = await res.json()
+	if(!res.ok){
+		throw new Error(data.error)
+	}
+	return data
+}
